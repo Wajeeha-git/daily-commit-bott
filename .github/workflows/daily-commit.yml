@@ -1,25 +1,36 @@
-name: Daily Commit
+name: Random Commit Bot
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Once per day
+    - cron: '0 */4 * * *'  # Every 4 hours
   workflow_dispatch:
 
 jobs:
-  commit:
+  random-commits:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Make a daily commit
+      - name: Generate random commits
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          echo "✅ Commit on $(date)" >> activity.log
           git config user.name "Wajeeha"
           git config user.email "47328@students.riphah.edu.pk"
-          git add activity.log
-          git commit -m "Daily activity update" || echo "Nothing to commit"
-          git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git
+
+          # Generate random number of commits between 1 and 15
+          COUNT=$(( ( RANDOM % 15 ) + 1 ))
+
+          echo "🔁 Making $COUNT commits now..."
+
+          for ((i=1; i<=COUNT; i++)); do
+            echo "🌱 Commit $i at $(date)" >> activity.log
+            git add activity.log
+            git commit -m "🌱 Random commit $i"
+            sleep $(( RANDOM % 10 ))  # Random 0–9 sec pause
+          done
+
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}
+          git push
