@@ -2,8 +2,11 @@ name: Random Commit Bot
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # Every 4 hours
+    - cron: "17 */4 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   random-commits:
@@ -11,26 +14,21 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Generate random commits
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git config user.name "Wajeeha"
           git config user.email "47328@students.riphah.edu.pk"
 
-          # Generate random number of commits between 1 and 15
           COUNT=$(( ( RANDOM % 15 ) + 1 ))
-
-          echo "🔁 Making $COUNT commits now..."
+          echo "Making $COUNT commits now..."
 
           for ((i=1; i<=COUNT; i++)); do
-            echo "🌱 Commit $i at $(date)" >> activity.log
+            echo "Commit $i at $(date -u)" >> activity.log
             git add activity.log
-            git commit -m "🌱 Random commit $i"
-            sleep $(( RANDOM % 10 ))  # Random 0–9 sec pause
+            git commit -m "Random commit $i"
+            sleep $(( RANDOM % 10 ))
           done
 
-          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}
           git push
